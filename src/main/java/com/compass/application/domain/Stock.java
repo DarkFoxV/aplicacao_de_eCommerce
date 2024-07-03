@@ -1,9 +1,6 @@
 package com.compass.application.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,13 +9,14 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Estoque implements Serializable {
+@ToString
+public class Stock implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private Produto produto;
-    private Integer quantidade;
+    private Product product;
+    private Integer quantity;
 
 }

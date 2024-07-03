@@ -7,21 +7,17 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Produto implements Serializable {
+public class OrderItemPK implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long id;
-    private String nome;
-    private Double preco;
-    private final List<Categoria> categoria = new ArrayList<>();
+    private Product product;
+    private Sale sale;
 
 }
