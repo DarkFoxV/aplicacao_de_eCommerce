@@ -1,5 +1,7 @@
 package com.compass.application.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serial;
@@ -13,15 +15,23 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@Entity
 public class Product implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private Double price;
-    private final List<Category> category = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "PRODUCT_CATEGORY", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private final List<Category> categories = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
