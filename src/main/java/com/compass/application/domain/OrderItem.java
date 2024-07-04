@@ -23,16 +23,18 @@ public class OrderItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
-    private OrderItemPK id = new OrderItemPK();
+    @JsonIgnore
+    private OrderItemPK id;
 
     private Integer quantity;
     private Double discount;
 
     public OrderItem(Integer quantidade, Double desconto, Product product, Sale sale) {
-        this.quantity = quantidade;
-        this.discount = desconto;
+        this.id = new OrderItemPK();
         this.id.setProduct(product);
         this.id.setSale(sale);
+        this.quantity = quantidade;
+        this.discount = desconto;
     }
 
     @JsonIgnore
