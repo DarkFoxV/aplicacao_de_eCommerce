@@ -1,11 +1,14 @@
 package com.compass.application.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,8 +32,15 @@ public class Product implements Serializable {
 
     private Double price;
 
+    private boolean enabled;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
     @ManyToMany
     @JoinTable(name = "PRODUCT_CATEGORY", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JsonIgnore
+    @ToString.Exclude
     private final List<Category> categories = new ArrayList<>();
 
     @Override
