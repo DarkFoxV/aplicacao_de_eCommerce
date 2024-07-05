@@ -19,7 +19,11 @@ public class ProductService {
     }
 
     public Product findById(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found category"));
+        return productRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found Product: " + id));
+    }
+
+    public Product findByName(String name) {
+        return productRepository.findByName(name).orElseThrow(() -> new ObjectNotFoundException("Not found Product: " + name));
     }
 
     public Product save(Product category) {
