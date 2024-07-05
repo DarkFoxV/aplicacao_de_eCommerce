@@ -19,7 +19,7 @@ public class SaleService {
     }
 
     public Sale findById(Long id) {
-        return saleRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found category"));
+        return saleRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found sale: " + id));
     }
 
     public Sale save(Sale category) {
