@@ -1,14 +1,11 @@
 package com.compass.application.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
