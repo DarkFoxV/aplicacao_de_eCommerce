@@ -5,12 +5,15 @@ import com.compass.application.dtos.SaleDTO;
 import com.compass.application.services.OrderItemService;
 import com.compass.application.services.ProductService;
 import com.compass.application.services.SaleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,15 +41,24 @@ public class SaleResource {
         return ResponseEntity.ok(sale);
     }
 
+    @GetMapping("/date")
+    public ResponseEntity<List<Sale>> getSalesInDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        List<Sale> sales = saleService.findSalesInDateRange(startDate, endDate);
+        return ResponseEntity.ok(sales);
+    }
+
     @PostMapping
-    public ResponseEntity<Sale> createSale(@RequestBody SaleDTO saleDTO) {
+    public ResponseEntity<Sale> createSale(@RequestBody @Valid SaleDTO saleDTO) {
         Sale sale = saleService.save(saleDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(sale.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Sale> updateSale(@PathVariable Long id, @RequestBody SaleDTO saleDTO) {
+    public ResponseEntity<Sale> updateSale(@PathVariable Long id, @RequestBody @Valid SaleDTO saleDTO) {
         Sale sale = saleService.updateSale(id, saleDTO);
         return ResponseEntity.ok(sale);
     }
