@@ -25,7 +25,7 @@ public class Sale implements Serializable {
     private Long id;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private Instant date;
 
     @OneToMany(mappedBy="id.sale")
     private final Set<OrderItem> itens = new HashSet<>();
