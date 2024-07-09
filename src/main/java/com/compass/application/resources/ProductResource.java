@@ -1,9 +1,10 @@
 package com.compass.application.resources;
 
 import com.compass.application.domain.Product;
+import com.compass.application.dtos.EnableProductDTO;
 import com.compass.application.dtos.ProductDTO;
 import com.compass.application.services.ProductService;
-import com.compass.application.utils.ISOInstantFormatter;
+import com.compass.application.validations.ValidBoolean;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -38,7 +40,7 @@ public class ProductResource {
             return ResponseEntity.status(409).build();
         }
 
-        Product product = new Product(null, productDTO.name(), productDTO.price(), true, ISOInstantFormatter.createISOInstant());
+        Product product = new Product(null, productDTO.name(), productDTO.price(), productDTO.enabled(), null);
         productService.save(product);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(product.getId()).toUri();
@@ -52,7 +54,16 @@ public class ProductResource {
         // update product attributes
         product.setName(productDTO.name());
         product.setPrice(productDTO.price());
+        product.setEnabled(productDTO.enabled());
 
+        productService.save(product);
+        return ResponseEntity.ok(product);
+    }
+
+    @PatchMapping("status/{id}")
+    public ResponseEntity<Product> disableProduct(@PathVariable Long id, @Valid @RequestBody EnableProductDTO enableProductDTO) {
+        Product product = productService.findById(id);
+        product.setEnabled(enableProductDTO.enabled());
         productService.save(product);
         return ResponseEntity.ok(product);
     }
