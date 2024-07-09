@@ -1,11 +1,15 @@
 package com.compass.application.services;
 
 import com.compass.application.domain.OrderItem;
+import com.compass.application.domain.Product;
 import com.compass.application.domain.Sale;
+import com.compass.application.domain.Stock;
+import com.compass.application.dtos.OrderItemDTO;
 import com.compass.application.dtos.SaleDTO;
 import com.compass.application.repositories.SaleRepository;
+import com.compass.application.services.exceptions.InsufficientStockException;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
-import com.compass.application.utils.ISOInstantFormatter;
+import com.compass.application.services.exceptions.ProductNotAvailableException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,9 @@ public class SaleService {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private StockService stockService;
+
     public List<Sale> findAll() {
         return saleRepository.findAll();
     }
@@ -43,7 +50,8 @@ public class SaleService {
     }
 
     public Sale save(SaleDTO saleDTO) {
-        Sale sale = new Sale(null, ISOInstantFormatter.createISOInstant());
+        validateStock(saleDTO);
+        Sale sale = new Sale();
 
         // Create a list of OrdersItems
         List<OrderItem> itens = saleDTO.orderItems().stream().map(orderItemDTO ->
@@ -56,18 +64,20 @@ public class SaleService {
         sale.getItens().addAll(itens);
         saleRepository.save(sale);
 
-        // Associate the items with the sale and save each item
+        // Associate the items with the sale
         itens.forEach(orderItem -> {
             orderItem.getId().getSale().setId(sale.getId());
-            orderItemService.save(orderItem);
             sale.getItens().add(orderItem);
         });
 
+        // Save all the items
+        orderItemService.saveAll(itens);
         return saleRepository.save(sale);
     }
 
     @Transactional
     public Sale updateSale(Long id, SaleDTO saleDTO) {
+        validateStock(saleDTO);
         Sale sale = findById(id);
 
         // Remove all old items from the sale
@@ -103,6 +113,26 @@ public class SaleService {
         }
 
         saleRepository.deleteById(id);
+    }
+
+    private void validateStock(SaleDTO saleDTO) {
+        for (OrderItemDTO orderItemDTO : saleDTO.orderItems()) {
+            Product product = productService.findById(orderItemDTO.productId());
+
+            if(!product.getEnabled()){
+                throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+            }
+
+            Stock stock = stockService.findById(orderItemDTO.productId());
+            int availableStock = stock.getQuantity();
+
+            if (orderItemDTO.quantity() > availableStock) {
+                throw new InsufficientStockException("Not enough stock for product ID: " + orderItemDTO.productId());
+            }
+
+            stock.setQuantity(stock.getQuantity() - orderItemDTO.quantity());
+            stockService.save(stock);
+        }
     }
 
 }
