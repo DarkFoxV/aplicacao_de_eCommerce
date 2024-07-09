@@ -3,6 +3,7 @@ package com.compass.application.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,10 +31,11 @@ public class Product implements Serializable {
 
     private Double price;
 
-    private boolean enabled;
+    private Boolean enabled;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private Instant date;
 
     @ManyToMany
     @JoinTable(name = "PRODUCT_CATEGORY", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
