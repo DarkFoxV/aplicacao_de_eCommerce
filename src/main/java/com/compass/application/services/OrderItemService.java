@@ -28,6 +28,10 @@ public class OrderItemService {
         return orderItemRepository.save(category);
     }
 
+    public List<OrderItem> saveAll(List<OrderItem> items) {
+        return orderItemRepository.saveAll(items);
+    }
+
     @Transactional
     public void deleteById(OrderItemPK id) {
         orderItemRepository.deleteById(id);
