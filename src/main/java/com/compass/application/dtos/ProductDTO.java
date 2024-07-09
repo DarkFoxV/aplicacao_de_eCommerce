@@ -1,5 +1,6 @@
 package com.compass.application.dtos;
 
+import com.compass.application.validations.ValidBoolean;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -12,6 +13,9 @@ public record ProductDTO(
         Double price,
 
         @Positive(message = "Product ID must be a positive value")
-        Long id
+        Long id,
+
+        @ValidBoolean
+        Boolean enabled
 ) {
 }
