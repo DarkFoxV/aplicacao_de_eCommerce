@@ -1,6 +1,7 @@
 package com.compass.application.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import lombok.Getter;
@@ -26,8 +27,13 @@ public class OrderItem implements Serializable {
     @JsonIgnore
     private OrderItemPK id;
 
+    @Column(nullable = false)
     private String productName;
+
+    @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false)
     private Double discount;
 
     public OrderItem(Integer quantidade, Double desconto, Product product, Sale sale) {

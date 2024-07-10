@@ -2,6 +2,7 @@ package com.compass.application.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Constraint;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -18,6 +19,9 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"name"})
+})
 public class Product implements Serializable {
 
     @Serial
@@ -27,10 +31,13 @@ public class Product implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private Double price;
 
+    @Column(nullable = false)
     private Boolean enabled;
 
     @CreationTimestamp
