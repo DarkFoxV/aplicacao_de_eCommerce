@@ -1,9 +1,6 @@
 package com.compass.application.resources.exceptions;
 
-import com.compass.application.services.exceptions.InsufficientStockException;
-import com.compass.application.services.exceptions.ObjectNotFoundException;
-import com.compass.application.services.exceptions.ProductInSaleException;
-import com.compass.application.services.exceptions.ProductNotAvailableException;
+import com.compass.application.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -38,10 +35,14 @@ public class ResourceExceptionHandler {
         return handleException("Cannot delete product because it is associated with existing sale", HttpStatus.CONFLICT, e, request);
     }
 
-
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<StandardError> handleInsufficientStockException(InsufficientStockException e, HttpServletRequest request) {
         return handleException("Insufficient stock", HttpStatus.CONFLICT, e, request);
+    }
+
+    @ExceptionHandler(ProductAlreadyExistsException.class)
+    public ResponseEntity<StandardError> handleProductAlreadyExistsException(ProductAlreadyExistsException e, HttpServletRequest request) {
+        return handleException("Product Already Exists", HttpStatus.CONFLICT, e, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
