@@ -77,7 +77,7 @@ public class ReportService {
             ReportProductDTO productDTO = productMap.computeIfAbsent(productId, id -> new ReportProductDTO(
                     productId,
                     item.getProductName(),
-                    item.getQuantity()
+                    0
             ));
             productDTO.setQuantity(productDTO.getQuantity() + item.getQuantity());
         }
