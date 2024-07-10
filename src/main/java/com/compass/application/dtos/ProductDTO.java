@@ -12,6 +12,9 @@ public record ProductDTO(
         @NotNull(message = "Price is required") @Positive(message = "Price must be positive or zero")
         Double price,
 
+        @Positive(message = "Quantity must be positive or zero")
+        Integer quantity,
+
         @Positive(message = "Product ID must be a positive value")
         Long id,
 
