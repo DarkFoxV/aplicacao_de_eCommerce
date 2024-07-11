@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+
+Product "1" -- "*" OrderItem
+Sale "1" -- "*" OrderItem
+Class Product {
+    id: Integer
+    name: String
+    price: Double
+}
+
+Class Sale {
+    id: Integer
+    date: Date
+}
+
+class OrderItem {
+    Id: Integer
+    quantidade: Integer
+    Double: desconto
+}
+
+@enduml
