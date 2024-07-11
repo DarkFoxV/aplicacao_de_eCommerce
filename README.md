@@ -18,9 +18,9 @@
 - [Java](https://www.oracle.com/java/technologies/downloads/)
 - [Maven](https://maven.apache.org/download.cgi)
 - [Spring Boot](https://spring.io/projects/spring-boot)
-- [Spring Cache Abstraction] (https://docs.spring.io/spring-framework/reference/integration/cache.html)
-- [RESTful APIs] (https://spring.io/guides/gs/rest-service)
-- [Swagger] (https://swagger.io)
+- [Spring Cache Abstraction](https://docs.spring.io/spring-framework/reference/integration/cache.html)
+- [RESTful APIs](https://spring.io/guides/gs/rest-service)
+- [Swagger](https://swagger.io)
 
 ## 💻 Projeto
 Este projeto é um sistema de e-commerce completo desenvolvido utilizando os princípios da Layered Architecture. O sistema
@@ -30,4 +30,3 @@ estoque, gestão de descontos e geração de relatórios de vendas. Desenvolvido
 ## 🛠️ Configuração
 
 O projeto requer um banco de dados Mysql ou H2:
-
