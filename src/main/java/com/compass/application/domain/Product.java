@@ -1,17 +1,15 @@
 package com.compass.application.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.Constraint;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,6 +40,7 @@ public class Product implements Serializable {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Instant date;
 
     @ManyToMany
@@ -49,6 +48,19 @@ public class Product implements Serializable {
     @JsonIgnore
     @ToString.Exclude
     private final List<Category> categories = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy="id.product")
+    private final Set<OrderItem> itens = new HashSet<>();
+
+    @JsonIgnore
+    public List<Sale> getSales() {
+        List<Sale> list = new ArrayList<>();
+        for (OrderItem x : itens) {
+            list.add(x.getSale());
+        }
+        return list;
+    }
 
     @Override
     public boolean equals(Object o) {
