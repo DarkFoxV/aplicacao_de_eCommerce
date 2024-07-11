@@ -18,7 +18,7 @@ public record ProductDTO(
         @Positive(message = "Product ID must be a positive value")
         Long id,
 
-        @ValidBoolean
+        @ValidBoolean(message = "Product availability must be specified (true or false)")
         Boolean enabled
 ) {
 }
