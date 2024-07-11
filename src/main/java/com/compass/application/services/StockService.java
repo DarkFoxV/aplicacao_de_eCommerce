@@ -22,8 +22,8 @@ public class StockService {
         return stockRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found stock: " + id));
     }
 
-    public Stock findByProductId(Long productId) {
-        return stockRepository.findByProductId(productId).orElseThrow(() -> new ObjectNotFoundException("Not found stock for product: " + productId));
+    public Stock findByProductId(Long id) {
+        return stockRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found stock for product: " + id));
     }
 
     public Stock save(Stock stock) {
