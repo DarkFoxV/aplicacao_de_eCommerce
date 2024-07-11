@@ -1,5 +1,6 @@
 package com.compass.application.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,7 +28,11 @@ public class Sale implements Serializable {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private Instant date;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "sale")
+    private Payment payment;
 
     @OneToMany(mappedBy = "id.sale")
     private final Set<OrderItem> itens = new HashSet<>();
