@@ -5,15 +5,13 @@ import com.compass.application.domain.Sale;
 import com.compass.application.dtos.ReportDTO;
 import com.compass.application.dtos.ReportProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ReportService {
@@ -21,14 +19,20 @@ public class ReportService {
     @Autowired
     private SaleService saleService;
 
+    @Cacheable(value = "monthlyReports", key = "#root.method.name + ':' + #date.withDayOfMonth(1) + '-' + #date.withDayOfMonth(#date.lengthOfMonth())",
+            condition = "#date != null && #date.withDayOfMonth(1).isBefore(T(java.time.LocalDate).now().withDayOfMonth(1))")
     public ReportDTO generateMonthlyReport(LocalDate date) {
         // If date is null, set it to the current date
         if (date == null) {
             date = LocalDate.now();
         }
 
+        // Determine the first and last day of the month
+        LocalDate firstDayOfMonth = date.withDayOfMonth(1);
+        LocalDate lastDayOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+
         // Retrieve sales for the specified date
-        List<Sale> sales = saleService.findSalesInDateRange(date, date);
+        List<Sale> sales = saleService.findSalesInDateRange(firstDayOfMonth, lastDayOfMonth);
 
         // Flatten order items from sales into a list
         List<OrderItem> itens = sales
@@ -40,16 +44,11 @@ public class ReportService {
         List<ReportProductDTO> products = new ArrayList<>(createProductList(itens).values());
 
         // Create and return a ReportDTO
-        return new ReportDTO(date, date, sales.size(), products);
+        return new ReportDTO(firstDayOfMonth, lastDayOfMonth, sales.size(), products);
     }
-
     public ReportDTO generateWeeklyReport(LocalDate startDate) {
         // If startDate is null, set it to the start of the current week (Sunday)
-        if (startDate == null) {
-            startDate = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        } else {
-            startDate = startDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        }
+        startDate = Objects.requireNonNullElseGet(startDate, LocalDate::now).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
 
         // Define endDate as the seventh day after startDate (end of the week)
         LocalDate endDate = startDate.plusDays(6);
