@@ -36,6 +36,9 @@ public class OrderItem implements Serializable {
     @Column(nullable = false)
     private Double discount;
 
+    @Column(nullable = false)
+    private Double TotalValue;
+
     public OrderItem(Integer quantidade, Double desconto, Product product, Sale sale) {
         this.id = new OrderItemPK();
         this.id.setProduct(product);
@@ -43,6 +46,7 @@ public class OrderItem implements Serializable {
         this.productName = product.getName();
         this.quantity = quantidade;
         this.discount = desconto;
+        this.TotalValue = (product.getPrice() * (1 - (desconto / 100))) * quantidade;
     }
 
     @JsonIgnore
