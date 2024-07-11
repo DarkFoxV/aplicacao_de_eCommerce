@@ -12,6 +12,8 @@ import com.compass.application.services.exceptions.ObjectNotFoundException;
 import com.compass.application.services.exceptions.ProductNotAvailableException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -35,6 +37,7 @@ public class SaleService {
     @Autowired
     private StockService stockService;
 
+    @Cacheable(value = "sales", key = "#root.methodName")
     public List<Sale> findAll() {
         return saleRepository.findAll();
     }
@@ -45,10 +48,12 @@ public class SaleService {
         return saleRepository.findByDateBetween(startInstant, endInstant);
     }
 
+    @Cacheable(value = "sales", key = "#id")
     public Sale findById(Long id) {
         return saleRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found sale: " + id));
     }
 
+    @CacheEvict(value = "sales", allEntries = true)
     public Sale save(SaleDTO saleDTO) {
         validateStock(saleDTO);
         Sale sale = new Sale();
@@ -66,7 +71,6 @@ public class SaleService {
 
         // Associate the items with the sale
         itens.forEach(orderItem -> {
-            orderItem.getId().getSale().setId(sale.getId());
             sale.getItens().add(orderItem);
         });
 
@@ -76,7 +80,12 @@ public class SaleService {
     }
 
     @Transactional
+    @CacheEvict(value = "sales", allEntries = true)
     public Sale updateSale(Long id, SaleDTO saleDTO) {
+        if (!saleRepository.existsById(id)) {
+            throw new ObjectNotFoundException("Not found sale: " + id);
+        }
+
         validateStock(saleDTO);
         Sale sale = findById(id);
 
@@ -94,15 +103,15 @@ public class SaleService {
 
         // Associate the new items with the sale and save each item
         itens.forEach(orderItem -> {
-            orderItem.getId().getSale().setId(sale.getId());
             orderItemService.save(orderItem);
             sale.getItens().add(orderItem);
         });
 
-        // save and return the new sale
-        return saleRepository.save(sale);
+        //return the new sale
+        return sale;
     }
 
+    @CacheEvict(value = "sales", allEntries = true)
     public void delete(Long id) {
         Sale sale = findById(id);
 
