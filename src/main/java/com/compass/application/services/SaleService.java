@@ -1,9 +1,7 @@
 package com.compass.application.services;
 
-import com.compass.application.domain.OrderItem;
-import com.compass.application.domain.Product;
-import com.compass.application.domain.Sale;
-import com.compass.application.domain.Stock;
+import com.compass.application.domain.*;
+import com.compass.application.domain.enums.PaymentStatus;
 import com.compass.application.dtos.OrderItemDTO;
 import com.compass.application.dtos.SaleDTO;
 import com.compass.application.repositories.SaleRepository;
@@ -57,6 +55,9 @@ public class SaleService {
     public Sale save(SaleDTO saleDTO) {
         validateStock(saleDTO);
         Sale sale = new Sale();
+
+        Payment payment = new Payment(null, PaymentStatus.PENDING, sale);
+        sale.setPayment(payment);
 
         // Create a list of OrdersItems
         List<OrderItem> itens = saleDTO.orderItems().stream().map(orderItemDTO ->
@@ -128,7 +129,7 @@ public class SaleService {
         for (OrderItemDTO orderItemDTO : saleDTO.orderItems()) {
             Product product = productService.findById(orderItemDTO.productId());
 
-            if(!product.getEnabled()){
+            if (!product.getEnabled()) {
                 throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
             }
 
