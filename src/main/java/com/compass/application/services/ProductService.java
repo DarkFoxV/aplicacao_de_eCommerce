@@ -69,10 +69,6 @@ public class ProductService {
 
     @CacheEvict(value = "products", allEntries = true)
     public void delete(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new ObjectNotFoundException("Not found Product: " + id);
-        }
-
         Product product = findById(id);
         Stock stock = stockService.findById(id);
         stockService.delete(stock.getId());
