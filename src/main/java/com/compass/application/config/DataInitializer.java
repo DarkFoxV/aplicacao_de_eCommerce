@@ -2,10 +2,12 @@ package com.compass.application.config;
 
 import com.compass.application.domain.*;
 import com.compass.application.domain.enums.PaymentStatus;
+import com.compass.application.domain.enums.UserRoles;
 import com.compass.application.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,8 +32,14 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private StockRepository stockRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public void run(String... args) throws Exception {
+        String encryptedPassword = new BCryptPasswordEncoder().encode("12345@Mi");
+        User user = userRepository.save(new User(null,"Michel Pereira","michelpereira9980@gmail.com",encryptedPassword, UserRoles.ADMIN));
+
         Random random = new Random ();
 
         Product prod1 = new Product(null, "Computador", 2000.0, true, Instant.now().minus(Duration.ofDays(random.nextInt(7,21))));
@@ -50,7 +58,7 @@ public class DataInitializer implements CommandLineRunner {
         Stock stock6 = new Stock (prod6.getId(), prod6, 10);
         stockRepository.saveAll(Arrays.asList(stock1, stock2, stock3, stock4, stock5, stock6));
 
-        Sale s1 = new Sale();
+        Sale s1 = new Sale(null, user,null,null);
         Payment payment1 = new Payment (null, PaymentStatus.PAID, s1);
         s1.setPayment(payment1);
         saleRepository.save(s1);

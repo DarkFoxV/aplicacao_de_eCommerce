@@ -35,6 +35,9 @@ public class SaleService {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private UserService userService;
+
     @Cacheable(value = "sales", key = "#root.methodName")
     public List<Sale> findAll() {
         return saleRepository.findAll();
@@ -52,9 +55,10 @@ public class SaleService {
     }
 
     @CacheEvict(value = "sales", allEntries = true)
-    public Sale save(SaleDTO saleDTO) {
+    public Sale save(SaleDTO saleDTO, String email) {
+        User user = userService.findByEmail(email);
         validateStock(saleDTO);
-        Sale sale = new Sale();
+        Sale sale = new Sale(null, user, null,null);
 
         Payment payment = new Payment(null, PaymentStatus.PENDING, sale);
         sale.setPayment(payment);
@@ -69,11 +73,6 @@ public class SaleService {
         // Associate the items with the sale and save each item
         sale.getItens().addAll(itens);
         saleRepository.save(sale);
-
-        // Associate the items with the sale
-        itens.forEach(orderItem -> {
-            sale.getItens().add(orderItem);
-        });
 
         // Save all the items
         orderItemService.saveAll(itens);

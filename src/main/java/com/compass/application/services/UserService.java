@@ -8,7 +8,6 @@ import com.compass.application.services.exceptions.ObjectNotFoundException;
 import com.compass.application.services.exceptions.ObjectAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +28,7 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
-        UserDetails userDetails = userRepository.findByEmail(email).orElseThrow(() -> new ObjectNotFoundException("User not found: " + email));
-        return (User) userDetails;
+        return (User) userRepository.findByEmail(email).orElseThrow(() -> new ObjectNotFoundException("User not found: " + email));
     }
 
     public User save(UserDTO userDTO) {
