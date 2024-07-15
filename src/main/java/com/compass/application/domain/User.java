@@ -11,6 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 
 @AllArgsConstructor
@@ -19,7 +20,7 @@ import java.util.List;
 @Setter
 @ToString
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "clients", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"email"})
 })
 public class User implements Serializable, UserDetails {
@@ -34,7 +35,7 @@ public class User implements Serializable, UserDetails {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -42,14 +43,12 @@ public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
     private UserRoles role;
-
-
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role == UserRoles.ADMIN){
+        if (this.role == UserRoles.ADMIN) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
-        }
-        else{
+        } else {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
     }
@@ -61,21 +60,35 @@ public class User implements Serializable, UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return true;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(getId(), user.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
 }
