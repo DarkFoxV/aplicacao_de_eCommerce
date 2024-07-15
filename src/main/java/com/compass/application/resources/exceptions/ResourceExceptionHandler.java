@@ -10,6 +10,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@RestControllerAdvice
 public class ResourceExceptionHandler {
 
     @ExceptionHandler(ObjectNotFoundException.class)
@@ -40,8 +42,8 @@ public class ResourceExceptionHandler {
         return handleException("Insufficient stock", HttpStatus.CONFLICT, e, request);
     }
 
-    @ExceptionHandler(ProductAlreadyExistsException.class)
-    public ResponseEntity<StandardError> handleProductAlreadyExistsException(ProductAlreadyExistsException e, HttpServletRequest request) {
+    @ExceptionHandler(ObjectAlreadyExistsException.class)
+    public ResponseEntity<StandardError> handleProductAlreadyExistsException(ObjectAlreadyExistsException e, HttpServletRequest request) {
         return handleException("Product Already Exists", HttpStatus.CONFLICT, e, request);
     }
 

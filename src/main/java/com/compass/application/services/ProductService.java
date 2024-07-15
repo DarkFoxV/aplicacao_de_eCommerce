@@ -6,7 +6,7 @@ import com.compass.application.dtos.EnableProductDTO;
 import com.compass.application.dtos.ProductDTO;
 import com.compass.application.repositories.ProductRepository;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
-import com.compass.application.services.exceptions.ProductAlreadyExistsException;
+import com.compass.application.services.exceptions.ObjectAlreadyExistsException;
 import com.compass.application.services.exceptions.ProductInSaleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -43,7 +43,7 @@ public class ProductService {
             stockService.save(new Stock(product.getId(), product, productDTO.quantity() != null ? productDTO.quantity() : 0));
             return product;
         } catch (DataIntegrityViolationException e) {
-            throw new ProductAlreadyExistsException("Product Already Exists on stock");
+            throw new ObjectAlreadyExistsException("Product Already Exists on stock");
         }
     }
 
