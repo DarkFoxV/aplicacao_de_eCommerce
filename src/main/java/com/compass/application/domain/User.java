@@ -1,6 +1,7 @@
 package com.compass.application.domain;
 
 import com.compass.application.domain.enums.UserRoles;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,9 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @AllArgsConstructor
@@ -43,7 +42,10 @@ public class User implements Serializable, UserDetails {
 
     @Column(nullable = false)
     private UserRoles role;
-    
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final Set<Sale> sales = new HashSet<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == UserRoles.ADMIN) {

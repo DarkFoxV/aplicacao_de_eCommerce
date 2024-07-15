@@ -2,9 +2,11 @@ package com.compass.application.resources;
 
 import com.compass.application.domain.Sale;
 import com.compass.application.dtos.SaleDTO;
+import com.compass.application.security.TokenService;
 import com.compass.application.services.OrderItemService;
 import com.compass.application.services.ProductService;
 import com.compass.application.services.SaleService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -31,6 +33,9 @@ public class SaleResource {
     @Autowired
     private OrderItemService orderItemService;
 
+    @Autowired
+    private TokenService tokenService;
+
     @GetMapping
     public ResponseEntity<List<Sale>> findAllSales() {
         List<Sale> list = saleService.findAll();
@@ -53,8 +58,10 @@ public class SaleResource {
     }
 
     @PostMapping
-    public ResponseEntity<Sale> createSale(@RequestBody @Valid SaleDTO saleDTO) {
-        Sale sale = saleService.save(saleDTO);
+    public ResponseEntity<Sale> createSale(HttpServletRequest request, @RequestBody @Valid SaleDTO saleDTO) {
+        String token = tokenService.recoverToken(request);
+        String email = tokenService.validateToken(token);
+        Sale sale = saleService.save(saleDTO, email);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(sale.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }

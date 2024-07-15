@@ -36,15 +36,10 @@ public class UserResource {
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticateUser(@RequestBody @Valid UserDTO userDTO) {
-        try {
-            User user = userService.findByEmail(userDTO.email());
-            UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(userDTO.email(), userDTO.password());
-            var auth = authenticationManager.authenticate(usernamePassword);
-            var token = tokenService.generateToken((User) auth.getPrincipal());
-            return ResponseEntity.ok(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-
+        User user = userService.findByEmail(userDTO.email());
+        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(userDTO.email(), userDTO.password());
+        var auth = authenticationManager.authenticate(usernamePassword);
+        var token = tokenService.generateToken((User) auth.getPrincipal());
+        return ResponseEntity.ok(token);
     }
 }
