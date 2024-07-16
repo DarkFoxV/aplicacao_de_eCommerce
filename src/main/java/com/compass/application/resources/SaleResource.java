@@ -9,9 +9,9 @@ import com.compass.application.services.SaleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,7 +21,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("v1/sales")
-@CacheConfig(cacheNames = "sales")
 public class SaleResource {
 
     @Autowired
@@ -72,6 +71,7 @@ public class SaleResource {
         return ResponseEntity.ok(sale);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSale(@PathVariable Long id) {
         saleService.delete(id);

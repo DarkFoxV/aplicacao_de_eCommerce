@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,6 +38,7 @@ public class ProductResource {
         return ResponseEntity.ok(product);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody @Valid ProductDTO productDTO) {
         Product product = productService.save(productDTO);
@@ -44,18 +46,21 @@ public class ProductResource {
         return ResponseEntity.created(uri).build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductDTO productDTO) {
         Product product = productService.update(id, productDTO);
         return ResponseEntity.ok(product);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("status/{id}")
     public ResponseEntity<Product> disableProduct(@PathVariable Long id, @Valid @RequestBody EnableProductDTO enableProductDTO) {
         Product product = productService.enableOrDisable(id, enableProductDTO);
         return ResponseEntity.ok(product);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.delete(id);

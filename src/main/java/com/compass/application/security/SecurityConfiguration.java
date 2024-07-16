@@ -19,32 +19,33 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration{
+public class SecurityConfiguration {
 
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver exceptionResolver;
 
     @Bean
-    public SecurityFilter securityFilter(){
+    public SecurityFilter securityFilter() {
         return new SecurityFilter(exceptionResolver);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers().frameOptions().sameOrigin()
-                .and()
                 .authorizeHttpRequests(authorized -> authorized
-                        .requestMatchers(HttpMethod.POST, "/v1/users/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/v1/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/v1/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/v1/products/**","/v1/reports/**","/caches/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/v1/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(securityFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean
