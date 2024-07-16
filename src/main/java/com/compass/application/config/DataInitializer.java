@@ -5,8 +5,10 @@ import com.compass.application.domain.enums.PaymentStatus;
 import com.compass.application.domain.enums.UserRoles;
 import com.compass.application.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.Duration;
@@ -15,6 +17,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 @Configuration
+@Profile("dev")
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -38,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         String encryptedPassword = new BCryptPasswordEncoder().encode("12345@Mi");
-        User user = userRepository.save(new User(null,"Michel Pereira","michelpereira9980@gmail.com",encryptedPassword, UserRoles.ADMIN));
+        User user = userRepository.save(new User(null,"Michel Pereira","virtualmachinevx@gmail.com",encryptedPassword, UserRoles.ADMIN));
 
         Random random = new Random ();
 
