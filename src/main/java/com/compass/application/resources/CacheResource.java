@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ public class CacheResource {
     @Autowired
     private CacheManager cacheManager;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{cacheName}")
     public ResponseEntity<Object> getCacheContent(@PathVariable String cacheName) {
         Cache cache = cacheManager.getCache(cacheName);
