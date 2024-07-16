@@ -47,6 +47,11 @@ public class ResourceExceptionHandler {
         return handleException("Product Already Exists", HttpStatus.CONFLICT, e, request);
     }
 
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<StandardError> handleEmailException(EmailException e, HttpServletRequest request) {
+        return handleException("Internal Server Exception", HttpStatus.INTERNAL_SERVER_ERROR, e, request);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<StandardError> handleMethodNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         List<String> errors = e.getBindingResult().getAllErrors()
