@@ -1,5 +1,6 @@
 package com.compass.application.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,17 +14,21 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Table(name = "stocks")
 public class Stock implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore
     private Product product;
+
 
     @Column(nullable = false)
     private Integer quantity;

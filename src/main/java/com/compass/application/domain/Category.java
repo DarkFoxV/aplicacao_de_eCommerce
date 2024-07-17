@@ -15,6 +15,7 @@ import java.util.Objects;
 @Setter
 @ToString
 @Entity
+@Table(name = "Categories")
 public class Category implements Serializable {
 
     @Serial

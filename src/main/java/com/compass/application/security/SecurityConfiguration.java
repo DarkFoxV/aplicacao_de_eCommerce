@@ -35,11 +35,13 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers().frameOptions().sameOrigin()
+                .and()
                 .authorizeHttpRequests(authorized -> authorized
                         .requestMatchers(HttpMethod.GET, "/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/v1/products/**","/v1/reports/**","/caches/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/products/**", "/caches/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

@@ -3,6 +3,7 @@ package com.compass.application.resources.exceptions;
 import com.compass.application.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-@RestControllerAdvice
 public class ResourceExceptionHandler {
 
     @ExceptionHandler(ObjectNotFoundException.class)
@@ -35,6 +34,11 @@ public class ResourceExceptionHandler {
     @ExceptionHandler(ProductInSaleException.class)
     public ResponseEntity<StandardError> handleProductInSaleException(ProductInSaleException e, HttpServletRequest request) {
         return handleException("Cannot delete product because it is associated with existing sale", HttpStatus.CONFLICT, e, request);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<StandardError> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        return handleException("Cannot delete object because it is associated with existing object", HttpStatus.CONFLICT, e, request);
     }
 
     @ExceptionHandler(InsufficientStockException.class)
