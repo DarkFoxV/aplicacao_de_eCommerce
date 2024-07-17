@@ -19,7 +19,7 @@ import java.util.*;
 @Setter
 @ToString
 @Entity
-@Table(name = "clients", uniqueConstraints = {
+@Table(name = "user_accounts", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"email"})
 })
 public class User implements Serializable, UserDetails {

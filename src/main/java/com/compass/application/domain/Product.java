@@ -17,7 +17,7 @@ import java.util.*;
 @Setter
 @ToString
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "products", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"name"})
 })
 public class Product implements Serializable {
@@ -52,6 +52,9 @@ public class Product implements Serializable {
     @JsonIgnore
     @OneToMany(mappedBy="id.product")
     private final Set<OrderItem> itens = new HashSet<>();
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    private Stock stock;
 
     @JsonIgnore
     public List<Sale> getSales() {

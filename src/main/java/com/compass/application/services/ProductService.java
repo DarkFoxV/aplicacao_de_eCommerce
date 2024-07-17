@@ -40,7 +40,7 @@ public class ProductService {
         try {
             Product product = new Product(null, productDTO.name(), productDTO.price(), productDTO.enabled(), null);
             product = productRepository.save(product);
-            stockService.save(new Stock(product.getId(), product, productDTO.quantity() != null ? productDTO.quantity() : 0));
+            stockService.save(new Stock(null, product, productDTO.quantity() != null ? productDTO.quantity() : 0));
             return product;
         } catch (DataIntegrityViolationException e) {
             throw new ObjectAlreadyExistsException("Product Already Exists on stock");
@@ -69,14 +69,13 @@ public class ProductService {
 
     @CacheEvict(value = "products", allEntries = true)
     public void delete(Long id) {
-        Product product = findById(id);
-        Stock stock = stockService.findById(id);
-        stockService.delete(stock.getId());
+        if (!productRepository.existsById(id)) {
+            throw new ObjectNotFoundException("Not found Product: " + id);
+        }
 
         try {
             productRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            stockService.save(stock);
             throw new ProductInSaleException("Cannot delete Product with active sale");
         }
     }

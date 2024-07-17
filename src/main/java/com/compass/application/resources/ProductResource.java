@@ -4,6 +4,7 @@ import com.compass.application.domain.Product;
 import com.compass.application.dtos.EnableProductDTO;
 import com.compass.application.dtos.ProductDTO;
 import com.compass.application.services.ProductService;
+import com.compass.application.services.exceptions.ProductInSaleException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
