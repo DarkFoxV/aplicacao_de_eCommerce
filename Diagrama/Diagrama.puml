@@ -1,15 +1,17 @@
 @startuml
 left to right direction
 
-Product "1" -- "*" OrderItem
-Sale "1" -- "*" OrderItem
-Class Product {
+Product "1" --- "*" OrderItem
+Sale "1" --- "*" OrderItem
+Sale "*" --- "1" User
+
+class Product {
     id: Integer
     name: String
     price: Double
 }
 
-Class Sale {
+class Sale {
     id: Integer
     date: Date
 }
@@ -20,4 +22,10 @@ class OrderItem {
     Double: desconto
 }
 
+class User {
+    Id: Integer
+    email: String
+    password: String
+    Role: UserRole
+}
 @enduml

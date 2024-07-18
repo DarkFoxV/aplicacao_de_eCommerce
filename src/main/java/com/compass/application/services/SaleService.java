@@ -8,7 +8,7 @@ import com.compass.application.repositories.SaleRepository;
 import com.compass.application.services.exceptions.InsufficientStockException;
 import com.compass.application.services.exceptions.ObjectAlreadyExistsException;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
-import com.compass.application.services.exceptions.ProductNotAvailableException;
+import com.compass.application.services.exceptions.ObjectNotAvailableException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
@@ -86,6 +85,11 @@ public class SaleService {
     @CacheEvict(value = "sales", allEntries = true)
     public Sale addItemToSale(Long saleId, OrderItemDTO orderItemDTO) {
         Sale sale = findById(saleId);
+
+        if (!sale.getPayment().getPaymentStatus().equals(PaymentStatus.PENDING)) {
+            throw new ObjectNotAvailableException("Unable to modify finalized sales.");
+        }
+
         Product product = productService.findById(orderItemDTO.productId());
 
         OrderItemPK pk = new OrderItemPK();
@@ -99,7 +103,7 @@ public class SaleService {
         }
 
         if (!product.getEnabled()) {
-            throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+            throw new ObjectNotAvailableException("Product disabled: " + orderItemDTO.productId());
         }
 
         Stock stock = product.getStock();
@@ -125,6 +129,11 @@ public class SaleService {
     @CacheEvict(value = "sales", allEntries = true)
     public Sale removeItemFromSale(Long saleId, Long productId) {
         Sale sale = findById(saleId);
+
+        if (!sale.getPayment().getPaymentStatus().equals(PaymentStatus.PENDING)) {
+            throw new ObjectNotAvailableException("Unable to modify finalized sales.");
+        }
+
         Product product = productService.findById(productId);
         Stock stock = product.getStock();
 
@@ -154,10 +163,15 @@ public class SaleService {
     @CacheEvict(value = "sales", allEntries = true)
     public Sale updateItemInSale(Long saleId, OrderItemDTO orderItemDTO) {
         Sale sale = findById(saleId);
+
+        if (!sale.getPayment().getPaymentStatus().equals(PaymentStatus.PENDING)) {
+            throw new ObjectNotAvailableException("Unable to modify finalized sales.");
+        }
+
         Product product = productService.findById(orderItemDTO.productId());
 
         if (!product.getEnabled()) {
-            throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+            throw new ObjectNotAvailableException("Product disabled: " + orderItemDTO.productId());
         }
 
         Stock stock = product.getStock();
@@ -192,6 +206,15 @@ public class SaleService {
 
     @Transactional
     @CacheEvict(value = "sales", allEntries = true)
+    public Sale updatePaymentStatus(Long saleId) {
+        Sale sale = findById(saleId);
+        sale.getPayment().setPaymentStatus(PaymentStatus.PAID);
+        saleRepository.save(sale);
+        return sale;
+    }
+
+    @Transactional
+    @CacheEvict(value = "sales", allEntries = true)
     public void delete(Long id) {
         Sale sale = findById(id);
 
@@ -212,7 +235,7 @@ public class SaleService {
             Product product = productService.findById(item.productId());
 
             if (!product.getEnabled()) {
-                throw new ProductNotAvailableException("Product disabled: " + item.productId());
+                throw new ObjectNotAvailableException("Product disabled: " + item.productId());
             }
 
             Stock stock = product.getStock();
