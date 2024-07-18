@@ -27,9 +27,9 @@ public class ResourceExceptionHandler {
         return handleException("Object not found", HttpStatus.NOT_FOUND, e, request);
     }
 
-    @ExceptionHandler(ProductNotAvailableException.class)
-    public ResponseEntity<StandardError> handleProductNotAvailableException(ProductNotAvailableException e, HttpServletRequest request) {
-        return handleException("Product not available", HttpStatus.CONFLICT, e, request);
+    @ExceptionHandler(ObjectNotAvailableException.class)
+    public ResponseEntity<StandardError> handleObjectNotAvailableException(ObjectNotAvailableException e, HttpServletRequest request) {
+        return handleException("Object not available", HttpStatus.CONFLICT, e, request);
     }
 
     @ExceptionHandler(ProductInSaleException.class)

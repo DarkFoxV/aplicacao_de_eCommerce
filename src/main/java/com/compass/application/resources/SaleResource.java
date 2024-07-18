@@ -78,6 +78,12 @@ public class SaleResource {
         return ResponseEntity.ok(sale);
     }
 
+    @PutMapping("/{saleId}/payment")
+    public ResponseEntity<Sale> salePayment(@PathVariable Long saleId) {
+        Sale sale = saleService.updatePaymentStatus(saleId);
+        return ResponseEntity.ok(sale);
+    }
+
     @DeleteMapping("/{saleId}/items/{productId}")
     public ResponseEntity<Sale> removeItemFromSale(@PathVariable Long saleId, @PathVariable Long productId) {
         Sale sale = saleService.removeItemFromSale(saleId, productId);
