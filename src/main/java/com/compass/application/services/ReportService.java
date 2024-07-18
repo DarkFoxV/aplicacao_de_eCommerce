@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
@@ -19,17 +20,12 @@ public class ReportService {
     @Autowired
     private SaleService saleService;
 
-    @Cacheable(value = "monthlyReports", key = "#root.method.name + ':' + #date.withDayOfMonth(1) + '-' + #date.withDayOfMonth(#date.lengthOfMonth())",
-            condition = "#date != null && #date.withDayOfMonth(1).isBefore(T(java.time.LocalDate).now().withDayOfMonth(1))")
-    public ReportDTO generateMonthlyReport(LocalDate date) {
-        // If date is null, set it to the current date
-        if (date == null) {
-            date = LocalDate.now();
-        }
-
+    @Cacheable(value = "monthlyReports", key = "#root.method.name + ':' + #date.atDay(1) + '-' + #date.atEndOfMonth()",
+            condition = "#date != null && #date.isBefore(T(java.time.YearMonth).now())")
+    public ReportDTO generateMonthlyReport(YearMonth date) {
         // Determine the first and last day of the month
-        LocalDate firstDayOfMonth = date.withDayOfMonth(1);
-        LocalDate lastDayOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+        LocalDate firstDayOfMonth = date.atDay(1);
+        LocalDate lastDayOfMonth = date.atEndOfMonth();
 
         // Retrieve sales for the specified date
         List<Sale> sales = saleService.findSalesInDateRange(firstDayOfMonth, lastDayOfMonth);

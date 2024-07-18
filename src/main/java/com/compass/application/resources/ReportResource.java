@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 @RestController
 @RequestMapping("v1/reports")
@@ -26,9 +27,15 @@ public class ReportResource {
     }
 
     @GetMapping("/monthly")
-    public ResponseEntity<ReportDTO> getMonthlyReport(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+    public ResponseEntity<ReportDTO> getMonthlyReport(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth date) {
+        if (date == null) {
+            date = YearMonth.now();
+        }
+
         ReportDTO report = reportService.generateMonthlyReport(date);
         return ResponseEntity.ok(report);
+
+
     }
 
 }
