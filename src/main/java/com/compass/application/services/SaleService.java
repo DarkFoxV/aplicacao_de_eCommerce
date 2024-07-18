@@ -208,6 +208,15 @@ public class SaleService {
     @CacheEvict(value = "sales", allEntries = true)
     public Sale updatePaymentStatus(Long saleId) {
         Sale sale = findById(saleId);
+
+        if (sale.getItens().isEmpty()) {
+            throw new ObjectNotAvailableException("sales cannot be empty");
+        }
+
+        if (!sale.getPayment().getPaymentStatus().equals(PaymentStatus.PENDING)) {
+            throw new ObjectNotAvailableException("Unable to modify finalized sales.");
+        }
+
         sale.getPayment().setPaymentStatus(PaymentStatus.PAID);
         saleRepository.save(sale);
         return sale;
