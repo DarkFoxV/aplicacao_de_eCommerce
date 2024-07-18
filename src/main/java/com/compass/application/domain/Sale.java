@@ -31,8 +31,6 @@ public class Sale implements Serializable {
 
     @ManyToOne()
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
-    @ToString.Exclude
     private User user;
 
     @CreationTimestamp
