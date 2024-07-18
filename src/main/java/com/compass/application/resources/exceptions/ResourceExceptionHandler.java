@@ -1,5 +1,6 @@
 package com.compass.application.resources.exceptions;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.compass.application.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -34,6 +35,11 @@ public class ResourceExceptionHandler {
     @ExceptionHandler(ProductInSaleException.class)
     public ResponseEntity<StandardError> handleProductInSaleException(ProductInSaleException e, HttpServletRequest request) {
         return handleException("Cannot delete product because it is associated with existing sale", HttpStatus.CONFLICT, e, request);
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<StandardError> handleJWTVerificationException(JWTVerificationException e, HttpServletRequest request) {
+        return handleException("JWT Verification Exception", HttpStatus.BAD_REQUEST, e, request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
