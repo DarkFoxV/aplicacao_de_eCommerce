@@ -3,8 +3,8 @@ package com.compass.application.resources;
 import com.compass.application.domain.Product;
 import com.compass.application.dtos.EnableProductDTO;
 import com.compass.application.dtos.ProductDTO;
+import com.compass.application.dtos.UpdateStockDTO;
 import com.compass.application.services.ProductService;
-import com.compass.application.services.exceptions.ProductInSaleException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -58,6 +58,13 @@ public class ProductResource {
     @PatchMapping("status/{id}")
     public ResponseEntity<Product> disableProduct(@PathVariable Long id, @Valid @RequestBody EnableProductDTO enableProductDTO) {
         Product product = productService.enableOrDisable(id, enableProductDTO);
+        return ResponseEntity.ok(product);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("stock/{id}")
+    public ResponseEntity<Product> updateStock(@PathVariable Long id, @Valid @RequestBody UpdateStockDTO updateStockDTO) {
+        Product product = productService.updateStock(id, updateStockDTO.quantity());
         return ResponseEntity.ok(product);
     }
 

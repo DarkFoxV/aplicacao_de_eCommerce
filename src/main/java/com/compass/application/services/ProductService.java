@@ -5,9 +5,11 @@ import com.compass.application.domain.Stock;
 import com.compass.application.dtos.EnableProductDTO;
 import com.compass.application.dtos.ProductDTO;
 import com.compass.application.repositories.ProductRepository;
+import com.compass.application.services.exceptions.InsufficientStockException;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
 import com.compass.application.services.exceptions.ObjectAlreadyExistsException;
 import com.compass.application.services.exceptions.ProductInSaleException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,10 +37,11 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found Product: " + id));
     }
 
+    @Transactional
     @CacheEvict(value = "products", key = "'findAll'")
     public Product save(ProductDTO productDTO) {
         try {
-            Product product = new Product(null, productDTO.name(), productDTO.price(), productDTO.enabled(), null);
+            Product product = new Product(null, productDTO.name(), productDTO.price(), productDTO.enabled(), null, null);
             product = productRepository.save(product);
             stockService.save(new Stock(null, product, productDTO.quantity() != null ? productDTO.quantity() : 0));
             return product;
@@ -47,10 +50,11 @@ public class ProductService {
         }
     }
 
+    @Transactional
     @CacheEvict(value = "products", allEntries = true)
     public Product update(Long id, ProductDTO productDTO) {
         Product product = findById(id);
-        Stock stock = stockService.findById(id);
+        Stock stock = product.getStock();
         product.setName(productDTO.name());
         product.setPrice(productDTO.price());
         product.setEnabled(productDTO.enabled());
@@ -60,6 +64,7 @@ public class ProductService {
         return product;
     }
 
+    @Transactional
     @CacheEvict(value = "products", allEntries = true)
     public Product enableOrDisable(Long id, EnableProductDTO enableProductDTO) {
         Product product = findById(id);
@@ -67,6 +72,20 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public Product updateStock(Long id, int quantity) {
+        Product product = findById(id);
+        Stock stock = product.getStock();
+        if (quantity + stock.getQuantity() < 0) {
+            throw new InsufficientStockException("Insufficient stock for product: " + id);
+        }
+        stock.setQuantity(stock.getQuantity() + quantity);
+        stockService.save(stock);
+        return product;
+    }
+
+    @Transactional
     @CacheEvict(value = "products", allEntries = true)
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {
