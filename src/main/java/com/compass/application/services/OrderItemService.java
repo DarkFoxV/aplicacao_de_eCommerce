@@ -21,7 +21,7 @@ public class OrderItemService {
     }
 
     public OrderItem findById(OrderItemPK id) {
-        return orderItemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found category"));
+        return orderItemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found orderItem: " + id));
     }
 
     public OrderItem save(OrderItem category) {
