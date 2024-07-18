@@ -26,4 +26,11 @@ public class OrderItemPK implements Serializable {
     @JoinColumn(name = "sale_id")
     private Sale sale;
 
+    @Override
+    public String toString() {
+        return "OrderItemPK{" +
+                "product=" + product.getId() +
+                ", sale=" + sale.getId() +
+                '}';
+    }
 }

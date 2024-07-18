@@ -20,7 +20,7 @@ public class OrderItemService {
         return orderItemRepository.findAll();
     }
 
-    public OrderItem findById(Long id) {
+    public OrderItem findById(OrderItemPK id) {
         return orderItemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found category"));
     }
 
@@ -32,8 +32,10 @@ public class OrderItemService {
         return orderItemRepository.saveAll(items);
     }
 
-    @Transactional
     public void deleteById(OrderItemPK id) {
+        if (!orderItemRepository.existsById(id)) {
+            throw new ObjectNotFoundException("Not found OrderItem:" + id);
+        }
         orderItemRepository.deleteById(id);
     }
 
