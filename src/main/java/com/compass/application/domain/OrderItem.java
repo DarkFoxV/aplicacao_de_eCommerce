@@ -39,7 +39,7 @@ public class OrderItem implements Serializable {
     private Double discount;
 
     @Column(nullable = false)
-    private Double TotalValue;
+    private Double valuePerUnit;
 
     public OrderItem(Integer quantidade, Double desconto, Product product, Sale sale) {
         this.id = new OrderItemPK();
@@ -48,12 +48,16 @@ public class OrderItem implements Serializable {
         this.productName = product.getName();
         this.quantity = quantidade;
         this.discount = desconto;
-        this.TotalValue = (product.getPrice() * (1 - (desconto / 100))) * quantidade;
+        this.valuePerUnit = product.getPrice();
     }
 
     @JsonIgnore
     public Sale getSale() {
         return id.getSale();
+    }
+
+    public double getTotalValue() {
+        return (valuePerUnit * (1 - (discount / 100))) * quantity;
     }
 
     @Override
