@@ -40,7 +40,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorized -> authorized
                         .requestMatchers(HttpMethod.GET, "/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/users/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/h2-console/**","/swagger-ui.html", "/swagger-ui/**","/v3/api-docs/**").permitAll()
                         .requestMatchers("/v1/products/**", "/caches/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/v1/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
