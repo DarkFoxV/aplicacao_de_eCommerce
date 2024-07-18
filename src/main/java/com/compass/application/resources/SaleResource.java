@@ -72,7 +72,7 @@ public class SaleResource {
         return ResponseEntity.ok(sale);
     }
 
-    @PatchMapping("/{saleId}/items")
+    @PutMapping("/{saleId}/items")
     public ResponseEntity<Sale> updateItemInSale(@PathVariable Long saleId, @Valid @RequestBody OrderItemDTO orderItemDTO) {
         Sale sale = saleService.updateItemInSale(saleId, orderItemDTO);
         return ResponseEntity.ok(sale);
