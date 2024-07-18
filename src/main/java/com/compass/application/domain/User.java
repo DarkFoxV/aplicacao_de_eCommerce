@@ -12,7 +12,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -38,15 +37,20 @@ public class User implements Serializable, UserDetails {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
+    @ToString.Exclude
     private String password;
 
     @Column(nullable = false)
     private UserRoles role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @ToString.Exclude
     private final Set<Sale> sales = new HashSet<>();
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (this.role == UserRoles.ADMIN) {
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER"));
@@ -56,26 +60,31 @@ public class User implements Serializable, UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return email;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }
