@@ -5,6 +5,7 @@ import com.compass.application.domain.PasswordResetToken;
 import com.compass.application.domain.User;
 import com.compass.application.repositories.PasswordResetTokenRepository;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class PasswordResetService {
     @Autowired
     private EmailService emailService;
 
+    @Transactional
     public void initiatePasswordReset(String email) {
         User user = userService.findByEmail(email);
 
@@ -36,11 +38,13 @@ public class PasswordResetService {
         emailService.sendResetToken(email, token);
     }
 
+    @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token).orElseThrow(() -> new ObjectNotFoundException("Invalid token"));
 
         if (resetToken.isExpired()) {
-            throw new TokenExpiredException("Token has expired",resetToken.getExpiryDate().toInstant(ZoneOffset.of("GTM")));
+            tokenRepository.deleteById(resetToken.getId());
+            throw new TokenExpiredException("Token has expired", resetToken.getExpiryDate().toInstant(ZoneOffset.UTC));
         }
 
         User user = resetToken.getUser();

@@ -3,6 +3,7 @@ package com.compass.application.resources;
 import com.compass.application.domain.User;
 import com.compass.application.dtos.EmailDTO;
 import com.compass.application.dtos.ResetPasswordDTO;
+import com.compass.application.dtos.TokenDTO;
 import com.compass.application.dtos.UserDTO;
 import com.compass.application.security.TokenService;
 import com.compass.application.services.PasswordResetService;
@@ -39,12 +40,12 @@ public class UserResource {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody @Valid UserDTO userDTO) {
+    public ResponseEntity<TokenDTO> authenticateUser(@RequestBody @Valid UserDTO userDTO) {
         User user = userService.findByEmail(userDTO.email());
         UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(userDTO.email(), userDTO.password());
         var auth = authenticationManager.authenticate(usernamePassword);
         var token = tokenService.generateToken((User) auth.getPrincipal());
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new TokenDTO(token));
     }
 
     @PostMapping("/reset-password")

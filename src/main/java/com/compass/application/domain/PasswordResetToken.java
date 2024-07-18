@@ -28,8 +28,7 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private LocalDateTime expiryDate;
 
-    @Value("${spring.mail.expiration_hours}")
-    private static int EXPIRATION_HOURS;
+    private static int EXPIRATION_HOURS = 24;
 
     public PasswordResetToken(String token, User user) {
         this.token = token;
@@ -41,6 +40,5 @@ public class PasswordResetToken {
         return LocalDateTime.now().isAfter(expiryDate);
     }
 
-    // getters and setters
 }
 
