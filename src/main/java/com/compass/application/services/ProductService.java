@@ -64,9 +64,10 @@ public class ProductService {
         return product;
     }
 
+    // this method can enable or disable the product
     @Transactional
     @CacheEvict(value = "products", allEntries = true)
-    public Product enableOrDisable(Long id, EnableProductDTO enableProductDTO) {
+    public Product updateProductStatus(Long id, EnableProductDTO enableProductDTO) {
         Product product = findById(id);
         product.setEnabled(enableProductDTO.enabled());
         return productRepository.save(product);
@@ -85,7 +86,6 @@ public class ProductService {
         return product;
     }
 
-    @Transactional
     @CacheEvict(value = "products", allEntries = true)
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {

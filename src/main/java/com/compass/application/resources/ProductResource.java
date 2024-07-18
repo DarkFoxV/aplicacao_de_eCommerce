@@ -57,7 +57,7 @@ public class ProductResource {
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("status/{id}")
     public ResponseEntity<Product> disableProduct(@PathVariable Long id, @Valid @RequestBody EnableProductDTO enableProductDTO) {
-        Product product = productService.enableOrDisable(id, enableProductDTO);
+        Product product = productService.updateProductStatus(id, enableProductDTO);
         return ResponseEntity.ok(product);
     }
 
