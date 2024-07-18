@@ -6,6 +6,7 @@ import com.compass.application.dtos.OrderItemDTO;
 import com.compass.application.dtos.SaleDTO;
 import com.compass.application.repositories.SaleRepository;
 import com.compass.application.services.exceptions.InsufficientStockException;
+import com.compass.application.services.exceptions.ObjectAlreadyExistsException;
 import com.compass.application.services.exceptions.ObjectNotFoundException;
 import com.compass.application.services.exceptions.ProductNotAvailableException;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
@@ -75,7 +77,6 @@ public class SaleService {
         // Associate the items with sale
         sale.getItens().addAll(itens);
 
-
         // Save all the items
         orderItemService.saveAll(itens);
         return sale;
@@ -86,6 +87,16 @@ public class SaleService {
     public Sale addItemToSale(Long saleId, OrderItemDTO orderItemDTO) {
         Sale sale = findById(saleId);
         Product product = productService.findById(orderItemDTO.productId());
+
+        OrderItemPK pk = new OrderItemPK();
+        pk.setProduct(product);
+        pk.setSale(sale);
+
+        boolean alreadyExists = sale.getItens().stream().anyMatch(item -> item.getId().equals(pk));
+
+        if(alreadyExists) {
+            throw new ObjectAlreadyExistsException("Item already exists in sale: " + orderItemDTO.productId());
+        }
 
         if (!product.getEnabled()) {
             throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
@@ -101,11 +112,13 @@ public class SaleService {
         OrderItem orderItem = new OrderItem(orderItemDTO.quantity(), orderItemDTO.discount(), product, sale);
         orderItemService.save(orderItem);
 
+        sale.getItens().add(orderItem);
+
         // update stock
         stock.setQuantity(stock.getQuantity() - orderItemDTO.quantity());
         stockService.save(stock);
 
-        return saleRepository.save(sale);
+        return sale;
     }
 
     @Transactional
@@ -119,7 +132,13 @@ public class SaleService {
         pk.setProduct(product);
         pk.setSale(sale);
 
-        OrderItem orderItem = orderItemService.findById(pk);
+        OrderItem orderItem = sale.getItens().stream()
+                .filter(item -> item.getId().equals(pk))
+                .findFirst()
+                .orElseThrow(() -> new ObjectNotFoundException("Item not found in sale: " + productId));
+
+        sale.getItens().remove(orderItem);
+
         int quantity = orderItem.getQuantity();
 
         orderItemService.deleteById(pk);
@@ -128,7 +147,7 @@ public class SaleService {
         stock.setQuantity(stock.getQuantity() + quantity);
         stockService.save(stock);
 
-        return saleRepository.save(sale);
+        return sale;
     }
 
     @Transactional
@@ -146,7 +165,10 @@ public class SaleService {
         pk.setProduct(product);
         pk.setSale(sale);
 
-        OrderItem orderItem = orderItemService.findById(pk);
+        OrderItem orderItem = sale.getItens().stream()
+                .filter(item -> item.getId().equals(pk))
+                .findFirst()
+                .orElseThrow(() -> new ObjectNotFoundException("Item not found in sale: " + orderItemDTO.productId()));
 
         // Check the difference in quantity and ensure sufficient stock
         int currentQuantity = orderItem.getQuantity();
@@ -165,7 +187,7 @@ public class SaleService {
         stock.setQuantity(stock.getQuantity() - quantityDifference);
         stockService.save(stock);
 
-        return saleRepository.save(sale);
+        return sale;
     }
 
     @Transactional
