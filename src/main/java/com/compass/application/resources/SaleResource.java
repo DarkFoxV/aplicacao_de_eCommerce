@@ -1,6 +1,7 @@
 package com.compass.application.resources;
 
 import com.compass.application.domain.Sale;
+import com.compass.application.dtos.OrderItemDTO;
 import com.compass.application.dtos.SaleDTO;
 import com.compass.application.security.TokenService;
 import com.compass.application.services.OrderItemService;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -66,9 +66,21 @@ public class SaleResource {
         return ResponseEntity.created(uri).build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Sale> updateSale(@PathVariable Long id, @RequestBody @Valid SaleDTO saleDTO) {
-        Sale sale = saleService.updateSale(id, saleDTO);
+    @PostMapping("/{saleId}/items")
+    public ResponseEntity<Sale> addItemToSale(@PathVariable Long saleId, @Valid @RequestBody OrderItemDTO orderItemDTO) {
+        Sale sale = saleService.addItemToSale(saleId, orderItemDTO);
+        return ResponseEntity.ok(sale);
+    }
+
+    @PatchMapping("/{saleId}/items")
+    public ResponseEntity<Sale> updateItemInSale(@PathVariable Long saleId, @Valid @RequestBody OrderItemDTO orderItemDTO) {
+        Sale sale = saleService.updateItemInSale(saleId, orderItemDTO);
+        return ResponseEntity.ok(sale);
+    }
+
+    @DeleteMapping("/{saleId}/items/{productId}")
+    public ResponseEntity<Sale> removeItemFromSale(@PathVariable Long saleId, @PathVariable Long productId) {
+        Sale sale = saleService.removeItemFromSale(saleId, productId);
         return ResponseEntity.ok(sale);
     }
 
