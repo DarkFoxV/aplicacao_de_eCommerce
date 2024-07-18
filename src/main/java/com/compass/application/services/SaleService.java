@@ -54,14 +54,16 @@ public class SaleService {
         return saleRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Not found sale: " + id));
     }
 
+    @Transactional
     @CacheEvict(value = "sales", allEntries = true)
     public Sale save(SaleDTO saleDTO, String email) {
         User user = userService.findByEmail(email);
-        validateStock(saleDTO);
-        Sale sale = new Sale(null, user, null,null);
+        validateStock(saleDTO.orderItems());
+        Sale sale = new Sale(null, user, null, null);
 
         Payment payment = new Payment(null, PaymentStatus.PENDING, sale);
         sale.setPayment(payment);
+        saleRepository.save(sale);
 
         // Create a list of OrdersItems
         List<OrderItem> itens = saleDTO.orderItems().stream().map(orderItemDTO ->
@@ -70,47 +72,103 @@ public class SaleService {
                         productService.findById(orderItemDTO.productId()),
                         sale)).toList();
 
-        // Associate the items with the sale and save each item
+        // Associate the items with sale
         sale.getItens().addAll(itens);
-        saleRepository.save(sale);
+
 
         // Save all the items
         orderItemService.saveAll(itens);
+        return sale;
+    }
+
+    @Transactional
+    @CacheEvict(value = "sales", allEntries = true)
+    public Sale addItemToSale(Long saleId, OrderItemDTO orderItemDTO) {
+        Sale sale = findById(saleId);
+        Product product = productService.findById(orderItemDTO.productId());
+
+        if (!product.getEnabled()) {
+            throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+        }
+
+        Stock stock = product.getStock();
+
+        // ensure sufficient stock
+        if (stock.getQuantity() < orderItemDTO.quantity()) {
+            throw new InsufficientStockException("Insufficient stock for product: " + orderItemDTO.productId());
+        }
+
+        OrderItem orderItem = new OrderItem(orderItemDTO.quantity(), orderItemDTO.discount(), product, sale);
+        orderItemService.save(orderItem);
+
+        // update stock
+        stock.setQuantity(stock.getQuantity() - orderItemDTO.quantity());
+        stockService.save(stock);
+
         return saleRepository.save(sale);
     }
 
     @Transactional
     @CacheEvict(value = "sales", allEntries = true)
-    public Sale updateSale(Long id, SaleDTO saleDTO) {
-        if (!saleRepository.existsById(id)) {
-            throw new ObjectNotFoundException("Not found sale: " + id);
-        }
+    public Sale removeItemFromSale(Long saleId, Long productId) {
+        Sale sale = findById(saleId);
+        Product product = productService.findById(productId);
+        Stock stock = product.getStock();
 
-        validateStock(saleDTO);
-        Sale sale = findById(id);
+        OrderItemPK pk = new OrderItemPK();
+        pk.setProduct(product);
+        pk.setSale(sale);
 
-        // Remove all old items from the sale
-        sale.getItens().forEach(orderItem -> orderItemService.deleteById(orderItem.getId()));
-        sale.getItens().clear();
+        OrderItem orderItem = orderItemService.findById(pk);
+        int quantity = orderItem.getQuantity();
 
-        // Create and add the new items to the sale
-        List<OrderItem> itens = saleDTO.orderItems().stream().map(orderItemDTO ->
-                        new OrderItem(orderItemDTO.quantity(),
-                                orderItemDTO.discount(),
-                                productService.findById(orderItemDTO.productId()),
-                                sale))
-                .toList();
+        orderItemService.deleteById(pk);
 
-        // Associate the new items with the sale and save each item
-        itens.forEach(orderItem -> {
-            orderItemService.save(orderItem);
-            sale.getItens().add(orderItem);
-        });
+        // Restore the stock
+        stock.setQuantity(stock.getQuantity() + quantity);
+        stockService.save(stock);
 
-        //return the new sale
-        return sale;
+        return saleRepository.save(sale);
     }
 
+    @Transactional
+    @CacheEvict(value = "sales", allEntries = true)
+    public Sale updateItemInSale(Long saleId, OrderItemDTO orderItemDTO) {
+        Sale sale = findById(saleId);
+        Product product = productService.findById(orderItemDTO.productId());
+
+        if (!product.getEnabled()) {
+            throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+        }
+
+        Stock stock = product.getStock();
+        OrderItemPK pk = new OrderItemPK();
+        pk.setProduct(product);
+        pk.setSale(sale);
+
+        OrderItem orderItem = orderItemService.findById(pk);
+
+        // Check the difference in quantity and ensure sufficient stock
+        int currentQuantity = orderItem.getQuantity();
+        int newQuantity = orderItemDTO.quantity();
+        int quantityDifference = newQuantity - currentQuantity;
+
+        if (quantityDifference > 0 && stock.getQuantity() < quantityDifference) {
+            throw new InsufficientStockException("Insufficient stock for product: " + orderItemDTO.productId());
+        }
+
+        orderItem.setQuantity(orderItemDTO.quantity());
+        orderItem.setDiscount(orderItemDTO.discount());
+        orderItemService.save(orderItem);
+
+        // update stock
+        stock.setQuantity(stock.getQuantity() - quantityDifference);
+        stockService.save(stock);
+
+        return saleRepository.save(sale);
+    }
+
+    @Transactional
     @CacheEvict(value = "sales", allEntries = true)
     public void delete(Long id) {
         Sale sale = findById(id);
@@ -118,28 +176,31 @@ public class SaleService {
         // Delete all items related to the sale
         Set<OrderItem> itens = sale.getItens();
         for (OrderItem orderItem : itens) {
+            Stock stock = orderItem.getId().getProduct().getStock();
+            stock.setQuantity(stock.getQuantity() + orderItem.getQuantity());
+            stockService.save(stock);
             orderItemService.deleteById(orderItem.getId());
         }
 
         saleRepository.deleteById(id);
     }
 
-    private void validateStock(SaleDTO saleDTO) {
-        for (OrderItemDTO orderItemDTO : saleDTO.orderItems()) {
-            Product product = productService.findById(orderItemDTO.productId());
+    private void validateStock(List<OrderItemDTO> orderItemDTO) {
+        for (OrderItemDTO item : orderItemDTO) {
+            Product product = productService.findById(item.productId());
 
             if (!product.getEnabled()) {
-                throw new ProductNotAvailableException("Product disabled: " + orderItemDTO.productId());
+                throw new ProductNotAvailableException("Product disabled: " + item.productId());
             }
 
-            Stock stock = stockService.findById(orderItemDTO.productId());
+            Stock stock = product.getStock();
             int availableStock = stock.getQuantity();
 
-            if (orderItemDTO.quantity() > availableStock) {
-                throw new InsufficientStockException("Not enough stock for product ID: " + orderItemDTO.productId());
+            if (item.quantity() > availableStock) {
+                throw new InsufficientStockException("Not enough stock for product ID: " + item.productId());
             }
 
-            stock.setQuantity(stock.getQuantity() - orderItemDTO.quantity());
+            stock.setQuantity(stock.getQuantity() - item.quantity());
             stockService.save(stock);
         }
     }
